@@ -35,29 +35,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/index", "auth/login", "/auth/new", "/error").permitAll()
                 .anyRequest().authenticated()
                 .and()
-//                .formLogin().loginPage("/auth/login")
-//                .loginProcessingUrl("/process_login")
-//                .failureUrl("/auth/login?error")
                 .formLogin().successHandler(successUserHandler)
                 .permitAll()
                 .and()
                 .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
                 .permitAll();
     }
-
-    // аутентификация inMemory
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("user")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
