@@ -3,15 +3,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>List of users</title>
 </head>
 <body>
 <div>
     <th:block th:each="user : ${users}">
-        <a th:text="${user.getFirstName() + ' ' + user.getLastName()}">user</a>
+        <a th:href="@{/admin/users/{id}(id=${user.getUserId()})}"
+           th:text="${user.getFirstName() + ', ' + user.getLastName()}">user</a>
     </th:block>
 </div>
 <hr/>
+
+<a th:href="@{/admin/users/new}">Create new user</a>
+
+<hr/>
+
 <a th:href="@{/logout}">Logout</a>
+
 </body>
 </html>

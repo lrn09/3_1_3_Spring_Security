@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -26,13 +26,14 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
     public User() {
     }
@@ -68,6 +69,22 @@ public class User implements UserDetails {
         this.lastName = lastName;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
@@ -101,5 +118,17 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return getUserId().equals(user.getUserId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUserId());
     }
 }

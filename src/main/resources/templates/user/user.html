@@ -5,13 +5,10 @@
     <title>Spring Security Example</title>
 </head>
 <body>
-<h1>Admin, welcome spring boot admin page!</h1>
+<h1>User, welcome spring boot user page!</h1>
 
 <hr/>
 
-<div>
-    <a th:text="${admin.getFirstName() + ' ' + admin.getLastName()}">user</a>
-</div>
 <a th:href="@{/logout}">Logout</a>
 
 </body>
