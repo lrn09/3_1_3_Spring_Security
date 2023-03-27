@@ -1,4 +1,3 @@
-
 // Admin page header
 const adminNavbar = document.getElementById('adminNavbar')
 const activeAdminUrl = 'http://localhost:8080/admin'

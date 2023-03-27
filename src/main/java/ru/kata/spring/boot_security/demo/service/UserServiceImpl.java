@@ -1,7 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -53,14 +52,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(int id, User user) {
-        Optional<User> optionalUser = Optional.of(userRepository.findById(id).orElseThrow());
-
-        User userToBeUpdated = optionalUser.get();
-
-        userToBeUpdated.setFirstName(user.getFirstName());
-        userToBeUpdated.setLastName(user.getLastName());
-
-        userRepository.save(userToBeUpdated);
+        User userToBeUpdated = Optional.of(userRepository.findById(id).orElseThrow()).get();
+        saveUser(userToBeUpdated);
 
     }
 
