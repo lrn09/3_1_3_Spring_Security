@@ -7,13 +7,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.kata.spring.boot_security.demo.utils.StringToRoleConverter;
 
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class WebMvcConverterConfig implements WebMvcConfigurer {
 
 
     private final StringToRoleConverter stringToRoleConverter;
 
     @Autowired
-    public WebMvcConfig(StringToRoleConverter stringToRoleConverter) {
+    public WebMvcConverterConfig(StringToRoleConverter stringToRoleConverter) {
         this.stringToRoleConverter = stringToRoleConverter;
     }
 

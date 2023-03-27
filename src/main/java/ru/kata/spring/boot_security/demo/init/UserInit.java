@@ -2,8 +2,14 @@ package ru.kata.spring.boot_security.demo.init;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import ru.kata.spring.boot_security.demo.model.Role;
+import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
+
+import javax.annotation.PostConstruct;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Component
@@ -19,39 +25,39 @@ public class UserInit {
         this.passwordEncoder = passwordEncoder;
     }
 
-//    @PostConstruct
-//    private void initUsers() {
-//
-//        Role adminRole = roleRepository.getRoleByName("ROLE_ADMIN").orElseThrow();
-//        Role userRole = roleRepository.getRoleByName("ROLE_USER").orElseThrow();
-//
-//        User adminUser = new User();
-//        adminUser.setFirstName("Ivan");
-//        adminUser.setLastName("Ivanov");
-//        adminUser.setUsername("ivanivanov");
-//        adminUser.setPassword(passwordEncoder.encode("1234"));
-//
-//        Set<Role> adminRoles = new HashSet<>();
-//        adminRoles.add(adminRole);
-//        adminRoles.add(userRole);
-//
-//        adminUser.setRoles(adminRoles);
-//
-//        userRepository.save(adminUser);
-//
-//        User regularUser = new User();
-//        regularUser.setFirstName("Petr");
-//        regularUser.setLastName("Petrov");
-//        regularUser.setUsername("petrpetrov");
-//        regularUser.setPassword(passwordEncoder.encode("1234"));
-//
-//        Set<Role> regularUserRoles = new HashSet<>();
-//        regularUserRoles.add(userRole);
-//
-//        regularUser.setRoles(regularUserRoles);
-//
-//        userRepository.save(regularUser);
-//
-//
-//    }
+    @PostConstruct
+    private void initUsers() {
+
+        Role adminRole = new Role("ROLE_USER");
+        roleRepository.save(adminRole);
+        Role userRole = new Role("ROLE_ADMIN");
+        roleRepository.save(userRole);
+
+        User adminUser = new User();
+        adminUser.setFirstName("Ivan");
+        adminUser.setLastName("Ivanov");
+        adminUser.setAge(24);
+        adminUser.setUsername("ivan@mail.ru");
+        adminUser.setPassword(passwordEncoder.encode("1234"));
+
+        Set<Role> adminRoles = new HashSet<>();
+        adminRoles.add(roleRepository.getRoleByName("ROLE_ADMIN").get());
+        adminRoles.add(roleRepository.getRoleByName("ROLE_USER").get());
+
+        adminUser.setRoles(adminRoles);
+        userRepository.save(adminUser);
+
+        User regularUser = new User();
+        regularUser.setFirstName("Petr");
+        regularUser.setLastName("Petrov");
+        regularUser.setAge(31);
+        regularUser.setUsername("petr@gmail.com");
+        regularUser.setPassword(passwordEncoder.encode("1234"));
+
+        Set<Role> regularUserRoles = new HashSet<>();
+        regularUserRoles.add(roleRepository.getRoleByName("ROLE_USER").get());
+
+        regularUser.setRoles(regularUserRoles);
+        userRepository.save(regularUser);
+    }
 }

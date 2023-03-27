@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
@@ -7,7 +9,9 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
+@Getter
+@Setter
 public class Role implements GrantedAuthority {
 
     @Id
@@ -27,48 +31,26 @@ public class Role implements GrantedAuthority {
         this.name = name;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-
     @Override
     public String getAuthority() {
         return name;
     }
 
-    // переопределение метода equals для сравнения ролей по имени
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Role role = (Role) obj;
-        return Objects.equals(name, role.name);
+        return Objects.equals(id, role.id);
     }
 
-    // переопределение метода hashCode для сравнения ролей по имени
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(id);
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }
