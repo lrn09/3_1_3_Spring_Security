@@ -52,9 +52,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUser(int id, User user) {
-        User userToBeUpdated = Optional.of(userRepository.findById(id).orElseThrow()).get();
-        saveUser(userToBeUpdated);
+        Optional<User> optionalUser = Optional.of(userRepository.findById(id).orElseThrow());
+        User userToBeUpdated = optionalUser.get();
 
+        userToBeUpdated.setFirstName(user.getFirstName());
+        userToBeUpdated.setLastName(user.getLastName());
+        userToBeUpdated.setAge(user.getAge());
+        userToBeUpdated.setUsername(user.getUsername());
+        userToBeUpdated.setPassword(user.getPassword());
+        userToBeUpdated.setRoles(user.getAuthorities());
+        saveUser(userToBeUpdated);
     }
 
     @Override

@@ -1,24 +1,24 @@
 package ru.kata.spring.boot_security.demo.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
-public class User implements UserDetails {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer userId;
+    private Integer id;
     @Column(name = "first_name")
     private String firstName;
     @Column(name = "last_name")
@@ -33,37 +33,41 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;
+    @JsonIdentityReference(alwaysAsId = true)
+    private Set<Role> authorities;
 
     public User() {
     }
 
-    public User(String firstName, String lastName, int age, String username, String password, Set<Role> roles) {
+    public User(String firstName, String lastName, int age, String username, String password, Set<Role> authorities) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
         this.username = username;
         this.password = password;
-        this.roles = roles;
+        this.authorities = authorities;
     }
 
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+    public Integer getId() {
+        return id;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
 
-    @Override
-    public String getPassword() {
-        return password;
+    public String getLastName() {
+        return lastName;
+    }
+
+    public int getAge() {
+        return age;
     }
 
     @Override
@@ -71,22 +75,64 @@ public class User implements UserDetails {
         return username;
     }
 
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
+
+    @Override
+    public Set<Role> getAuthorities() {
+        return authorities;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> authorities) {
+        this.authorities = authorities;
+    }
+
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return true;
@@ -96,11 +142,11 @@ public class User implements UserDetails {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof User user)) return false;
-        return getUserId().equals(user.getUserId());
+        return getId().equals(user.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUserId());
+        return Objects.hash(getId());
     }
 }

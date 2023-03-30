@@ -1,24 +1,24 @@
 // Admin page header
 const adminNavbar = document.getElementById('adminNavbar')
-const activeAdminUrl = 'http://localhost:8080/admin'
+const activeAdminUrl = 'http://localhost:8080/api/getActiveUser'
 let activeAdminId
 
+
 fetch(activeAdminUrl)
-    .then(response => response.text())
+    .then(res => res.json())
     .then(data => {
-        const admin = JSON.parse(data);
-        adminNavbar.innerHTML = `User name: ${admin.username}, roles: ${admin.roles}`
-    });
+        adminNavbar.innerHTML = `${data.username} with roles: ${data.authorities}`
+        activeAdminId = `${data.id}`
+    })
 
 // User page header
 const userNavbar = document.getElementById('userNavbar')
-const activeUserUrl = 'http://localhost:8080/user'
-fetch(activeAdminUrl)
-    .then(response => response.text())
+const activeUserUrl = 'http://localhost:8080/api/getActiveUser'
+fetch(activeUserUrl)
+    .then(res => res.json())
     .then(data => {
-        const user = JSON.parse(data);
-        adminNavbar.innerHTML = `User name: ${user.username}, roles: ${user.roles}`
-    });
+        userNavbar.innerHTML = `${data.username} with roles: ${data.authorities}`
+    })
 
 showUserPage()
 
@@ -32,8 +32,8 @@ const listAllUsers = (users) => {
                             <td>${user.firstName}</td>
                             <td>${user.lastName}</td>
                             <td>${user.age}</td>
-                            <td>${user.email}</td>
-                            <td>${user.roles}</td>                            
+                            <td>${user.username}</td>
+                            <td>${user.authorities}</td>                            
                             <td><button type="button" class="btn btn-primary" data-toggle="modal" 
                                         data-target="#editModal" id="editButton" data-uid=${user.id}>Edit</button></td>
                             <td><button type="button" class="btn btn-danger" data-toggle="modal" 
@@ -63,38 +63,56 @@ function showUserPage() {
                 <td>${data.firstName}</td>
                 <td>${data.lastName}</td>
                 <td>${data.age}</td>
-                <td>${data.email}</td>
-                <td>${data.roles}</td>                  
+                <td>${data.username}</td>
+                <td>${data.authorities}</td>                  
             </tr>`
             userInfo.innerHTML = userInfoOutput
         })
 }
 
 // Creating new user
-const selectRoleForm = document.getElementById('role')
-const allRolesUrl = 'http://localhost:8080/api/getAllRoles'
+const createUserUrl = 'http://localhost:8080/api/users/create';
+const allRolesUrl = 'http://localhost:8080/api/getAllRoles';
+const selectRoleForm = document.getElementById('roles');
+
+
+// Fetch all roles from API and populate dropdown options
 fetch(allRolesUrl)
     .then(res => res.json())
     .then(data => {
-        let tempResult = ''
-        data.forEach(selectedRole => {
-            tempResult += `<option>${selectedRole}</option>`
-        })
-        selectRoleForm.innerHTML = tempResult
+        let options = '';
+        for (const [id, name] of Object.entries(data)) {
+            options += `<option value="${id}">${name}</option>`;
+        }
+        selectRoleForm.innerHTML = options;
     })
+    .catch(err => console.error(err));
 
-const createUserForm = document.getElementById('creating-user-form')
-
-const firstNameById = document.getElementById('first_name')
-const lastNameById = document.getElementById('last_name')
-const ageById = document.getElementById('age')
-const emailById = document.getElementById('email')
-const passwordById = document.getElementById('password')
-const roleById = document.getElementById('role')
+const createUserForm = document.getElementById('creating-user-form');
 
 createUserForm.addEventListener('submit', (e) => {
-    e.preventDefault()
-    fetch(usersUrl, {
+    e.preventDefault();
+
+    const firstNameById = document.getElementById('first_name');
+    const lastNameById = document.getElementById('last_name');
+    const ageById = document.getElementById('age');
+    const emailById = document.getElementById('email');
+    const passwordById = document.getElementById('password');
+    const roleById = document.getElementById('roles');
+
+    // create array of roles
+    const roles = [];
+    for (let i = 0; i < roleById.options.length; i++) {
+        if (roleById.options[i].selected) {
+            roles.push({
+                id: roleById.options[i].value,
+                authority: roleById.options[i].text
+            });
+        }
+    }
+
+    // POST user data to API
+    fetch(createUserUrl, {
         method: 'POST',
         headers: {
             'Content-type': 'application/json'
@@ -103,11 +121,10 @@ createUserForm.addEventListener('submit', (e) => {
             firstName: firstNameById.value,
             lastName: lastNameById.value,
             age: ageById.value,
-            email: emailById.value,
+            username: emailById.value,
             password: passwordById.value,
-            roles: [...roleById].filter(el => el.selected == true).map(el => el.text)
+            authorities: roles
         })
-
     })
         .then(res => res.json())
         .then(data => {
@@ -117,16 +134,17 @@ createUserForm.addEventListener('submit', (e) => {
             createUserForm.reset()
             $('[href="#users_table"]').tab('show');
         })
-})
+        .catch(err => console.error(err));
+});
+
 
 // Filling modal forms for edit and delete operations
-
-const editingUserForm = document.getElementById('users-table')
+const editingUserForm = document.getElementById('users-table');
 
 editingUserForm.addEventListener('click', (e) => {
     e.preventDefault()
 
-    if (e.target.id == 'editButton') {
+    if (e.target.id === 'editButton') {
         fetch(`http://localhost:8080/api/getUser?id=${e.target.dataset.uid}`)
             .then(res => res.json())
             .then(data => {
@@ -134,13 +152,24 @@ editingUserForm.addEventListener('click', (e) => {
                 $('#firstNameEdit').val(data.firstName)
                 $('#lastNameEdit').val(data.lastName)
                 $('#ageEdit').val(data.age)
-                $('#emailEdit').val(data.email)
+                $('#emailEdit').val(data.username)
                 $('#passwordEdit').val('')
-                $('#rolesEdit').val(data.roles)
 
-                $('#editModal').modal()
+                // Fetch all roles from API and populate dropdown options
+                fetch(allRolesUrl)
+                    .then(res => res.json())
+                    .then(rolesData => {
+                        let options = '';
+                        for (const [id, name] of Object.entries(rolesData)) {
+                            const selected = data.authorities.some(role => role.id === id) ? 'selected' : '';
+                            options += `<option value="${id}" ${selected}>${name}</option>`;
+                        }
+                        $('#rolesEdit').html(options);
+                        $('#editModal').modal()
+                    })
+                    .catch(err => console.error(err));
             });
-    } else if (e.target.id == 'deleteButton') {
+    } else if (e.target.id === 'deleteButton') {
         fetch(`http://localhost:8080/api/getUser?id=${e.target.dataset.uid}`)
             .then(res => res.json())
             .then(data => {
@@ -148,55 +177,69 @@ editingUserForm.addEventListener('click', (e) => {
                 $('#firstNameDelete').val(data.firstName)
                 $('#lastNameDelete').val(data.lastName)
                 $('#ageDelete').val(data.age)
-                $('#emailDelete').val(data.email)
+                $('#emailDelete').val(data.username)
                 $('#passwordDelete').val(data.password)
                 $('#rolesDelete').val(data.roles)
 
                 $('#deleteModal').modal()
             });
     }
-
-
 })
 
-// Editing user
+/// Editing user
 const editUserModalForm = document.getElementById('editModalForm')
 
 editUserModalForm.addEventListener('submit', (e) => {
     e.preventDefault()
+
+    const firstNameById = document.getElementById('firstNameEdit');
+    const lastNameById = document.getElementById('lastNameEdit');
+    const ageById = document.getElementById('ageEdit');
+    const emailById = document.getElementById('emailEdit');
+    const passwordById = document.getElementById('passwordEdit');
+    const roleById = document.getElementById('rolesEdit');
+
+    // create array of roles
+    const roles = [];
+    for (let i = 0; i < roleById.options.length; i++) {
+        if (roleById.options[i].selected) {
+            roles.push({
+                id: roleById.options[i].value,
+                authority: roleById.options[i].text
+            });
+        }
+    }
+
+    const requestBody = {
+        id: document.getElementById('idEdit').value,
+        firstName: firstNameById.value,
+        lastName: lastNameById.value,
+        age: ageById.value,
+        username: emailById.value,
+        password: passwordById.value,
+        authorities: roles
+    };
+
+    console.log('Request body:', requestBody);
+
     fetch(usersUrl, {
         method: 'PUT',
         headers: {
             'Content-type': 'application/json'
         },
-        body: JSON.stringify({
-            id: document.getElementById('idEdit').value,
-            firstName: document.getElementById('firstNameEdit').value,
-            lastName: document.getElementById('lastNameEdit').value,
-            age: document.getElementById('ageEdit').value,
-            email: document.getElementById('emailEdit').value,
-            password: document.getElementById('passwordEdit').value,
-            roles: [...document.getElementById('rolesEdit')].filter(el => el.selected == true).map(el => el.text)
-        })
+        body: JSON.stringify(requestBody)
     })
-        .then(res => res.json())
+        .then(res => console.log(res))
         .then(() => {
             $('#editModal').modal('hide')
             usersTableOutput = ''
             fetch(usersUrl)
                 .then(res => res.json())
                 .then(data => listAllUsers(data))
-            if (activeAdminId == document.getElementById('idEdit').value) {
-                fetch(activeAdminUrl)
-                    .then(res => res.json())
-                    .then(data => {
-                        adminNavbar.innerHTML = `${data.email} with roles: ${data.roles}`
-                    })
-                showUserPage()
-            }
         })
 
-})
+});
+
 
 // Deleting user
 const deleteUserModalForm = document.getElementById('deleteModalForm')
