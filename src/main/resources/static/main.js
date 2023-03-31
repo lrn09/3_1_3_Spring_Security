@@ -1,9 +1,39 @@
+// fields and variables
+
 // Admin page header
 const adminNavbar = document.getElementById('adminNavbar')
 const activeAdminUrl = 'http://localhost:8080/api/getActiveUser'
 let activeAdminId
 
+// User page header
+const userNavbar = document.getElementById('userNavbar')
+const activeUserUrl = 'http://localhost:8080/api/getActiveUser'
 
+// Listing all users function
+let usersTableOutput = ''
+
+// Listing all users on admin page
+const usersTable = document.getElementById("users-table")
+const usersUrl = 'http://localhost:8080/api/users'
+
+// Creating new user
+const createUserUrl = 'http://localhost:8080/api/users/create';
+const allRolesUrl = 'http://localhost:8080/api/getAllRoles';
+const selectRoleForm = document.getElementById('roles');
+const createUserForm = document.getElementById('creating-user-form');
+
+// Filling modal forms for edit and delete operations
+const editingUserForm = document.getElementById('users-table');
+
+/// Editing user
+const editUserModalForm = document.getElementById('editModalForm')
+
+// Deleting user
+const deleteUserModalForm = document.getElementById('deleteModalForm')
+
+// functions and methods
+
+// Admin page header
 fetch(activeAdminUrl)
     .then(res => res.json())
     .then(data => {
@@ -12,8 +42,6 @@ fetch(activeAdminUrl)
     })
 
 // User page header
-const userNavbar = document.getElementById('userNavbar')
-const activeUserUrl = 'http://localhost:8080/api/getActiveUser'
 fetch(activeUserUrl)
     .then(res => res.json())
     .then(data => {
@@ -21,34 +49,6 @@ fetch(activeUserUrl)
     })
 
 showUserPage()
-
-// Listing all users function
-let usersTableOutput = ''
-const listAllUsers = (users) => {
-    users.forEach(user => {
-        usersTableOutput += `
-                        <tr>
-                            <td>${user.id}</td>
-                            <td>${user.firstName}</td>
-                            <td>${user.lastName}</td>
-                            <td>${user.age}</td>
-                            <td>${user.username}</td>
-                            <td>${user.authorities}</td>                            
-                            <td><button type="button" class="btn btn-primary" data-toggle="modal" 
-                                        data-target="#editModal" id="editButton" data-uid=${user.id}>Edit</button></td>
-                            <td><button type="button" class="btn btn-danger" data-toggle="modal" 
-                                        data-target="#deleteModal" id="deleteButton" data-uid=${user.id}>Delete</button></td>
-                        </tr>`
-    })
-    usersTable.innerHTML = usersTableOutput
-}
-
-// Listing all users on admin page
-const usersTable = document.getElementById("users-table")
-const usersUrl = 'http://localhost:8080/api/users'
-fetch(usersUrl)
-    .then(res => res.json())
-    .then(data => listAllUsers(data))
 
 // Showing user page
 function showUserPage() {
@@ -64,19 +64,38 @@ function showUserPage() {
                 <td>${data.lastName}</td>
                 <td>${data.age}</td>
                 <td>${data.username}</td>
-                <td>${data.authorities}</td>                  
+                <td>${data.authorities}</td>
             </tr>`
             userInfo.innerHTML = userInfoOutput
         })
 }
 
+// Listing all users function
+const listAllUsers = (users) => {
+    users.forEach(user => {
+        usersTableOutput += `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.firstName}</td>
+                            <td>${user.lastName}</td>
+                            <td>${user.age}</td>
+                            <td>${user.username}</td>
+                            <td>${user.authorities}</td>
+                            <td><button type="button" class="btn btn-primary" data-toggle="modal"
+                                        data-target="#editModal" id="editButton" data-uid=${user.id}>Edit</button></td>
+                            <td><button type="button" class="btn btn-danger" data-toggle="modal"
+                                        data-target="#deleteModal" id="deleteButton" data-uid=${user.id}>Delete</button></td>
+                        </tr>`
+    })
+    usersTable.innerHTML = usersTableOutput
+}
+
+// Listing all users on admin page
+fetch(usersUrl)
+    .then(res => res.json())
+    .then(data => listAllUsers(data))
+
 // Creating new user
-const createUserUrl = 'http://localhost:8080/api/users/create';
-const allRolesUrl = 'http://localhost:8080/api/getAllRoles';
-const selectRoleForm = document.getElementById('roles');
-
-
-// Fetch all roles from API and populate dropdown options
 fetch(allRolesUrl)
     .then(res => res.json())
     .then(data => {
@@ -87,8 +106,6 @@ fetch(allRolesUrl)
         selectRoleForm.innerHTML = options;
     })
     .catch(err => console.error(err));
-
-const createUserForm = document.getElementById('creating-user-form');
 
 createUserForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -137,10 +154,7 @@ createUserForm.addEventListener('submit', (e) => {
         .catch(err => console.error(err));
 });
 
-
 // Filling modal forms for edit and delete operations
-const editingUserForm = document.getElementById('users-table');
-
 editingUserForm.addEventListener('click', (e) => {
     e.preventDefault()
 
@@ -187,8 +201,6 @@ editingUserForm.addEventListener('click', (e) => {
 })
 
 /// Editing user
-const editUserModalForm = document.getElementById('editModalForm')
-
 editUserModalForm.addEventListener('submit', (e) => {
     e.preventDefault()
 
@@ -240,10 +252,7 @@ editUserModalForm.addEventListener('submit', (e) => {
 
 });
 
-
 // Deleting user
-const deleteUserModalForm = document.getElementById('deleteModalForm')
-
 deleteUserModalForm.addEventListener('submit', (e) => {
     e.preventDefault()
     const uid = document.getElementById('idDelete').value

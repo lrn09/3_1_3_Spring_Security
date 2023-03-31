@@ -33,45 +33,52 @@ public class RestController {
         return userService.getAllUsers();
     }
 
+
     @GetMapping("/users/{id}")
     public User getUser(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
+    @ResponseBody
     @PostMapping("/users/create")
     public User createUser(@RequestBody User user) {
         userService.saveUser(user);
         return user;
     }
 
+    @ResponseBody
     @PutMapping("/users")
     public User updateUser(@RequestBody User user) {
         userService.updateUser(user.getId(), user);
         return user;
     }
 
+    @ResponseBody
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
     }
 
-
-    @RequestMapping("/getUser")
     @ResponseBody
+    @RequestMapping("/getUser")
     public User getUserById(int id) {
         return userService.getUserById(id);
     }
 
+
+    @ResponseBody
     @GetMapping("/getActiveUser")
     public User getActiveUser(@AuthenticationPrincipal User user) {
         return userService.getUserById(user.getId());
     }
 
+    @ResponseBody
     @GetMapping("/getAllRoles")
     public Map<Integer, String> getAllRoles() {
         return roleService.getAvailableRolesAsMap();
     }
 
+    @ResponseBody
     @GetMapping("/api/getRoleIdByName")
     public int getRoleIdByName(@RequestParam("name") String name) {
         Role role = roleService.getRoleByName(name);
